@@ -37,7 +37,7 @@ class ProjectController extends Controller
     {
         $categories= Category::all();
         $technologies = Technology::all();
-        return view('admin.projects.create', compact('categories','tecnologies'));
+        return view('admin.projects.create', compact('categories','technologies'));
     }
 
     /**
@@ -51,7 +51,9 @@ class ProjectController extends Controller
         if($request->hasFile('image')){
             //dd($request->file('image')); 
             $name = $request->image->getClientOriginalName();
+            dd($request->image);
             $img_path =Storage::putFileAs('image', $request->image, $name); //storage/image//nomefile.jpeg
+    
             //dd($img_path);
             $form_data['image'] = $img_path;
         }
@@ -87,11 +89,14 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
+       
         $form_data = $request->all();
+
         $form_data['category_id'] = Auth::id();
-        if ($project->title !== $form_data['title']) {
-            $form_data['slug'] = Project::generateSlug($form_data['title']);
-        };
+        // if ($project->title !== $form_data['title']) {
+        //     $form_data['slug'] = Project::generateSlug($form_data['title']);
+        // };
+   
         if($request->hasFile('image')){
             //controllo se prima c'era un'img
             if($project->image){
@@ -99,20 +104,24 @@ class ProjectController extends Controller
             }
             //uso il metodo per salvare il file con il nome originale
             $name = $request->image->getClientOriginalName();
+
             $img_path =Storage::putFileAs('image', $request->image, $name); 
 
             $form_data['image'] = $img_path;
+        
         }
         // DB::enableQueryLog();
         $project->update($form_data); //query da eseguire
         // $query = DB::getQueryLog();
         // dd($query);
+
         if ($request->has('technologies')) {
             $project->technologies()->sync($request->technologies); //controlla se ci sono stati dei check
         } else {
             $project->technologies()->sync([]);
         }
-        return redirect()->route("admin.projects.show")->with('message', "Project (id:{$project->id}): {$project->title} succesfully edited ");
+    
+        return redirect()->route("admin.projects.show", $project->slug)->with('message', "Project (id:{$project->id}): {$project->title} succesfully edited ");
     }
 
 
