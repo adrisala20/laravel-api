@@ -13,6 +13,7 @@ class ProjectController extends Controller
 {
     
     $projects = Project::all();
+    //dd($projects);
     //$projects = Project::paginate();
     return response()->json([
         'status' => 'success',
@@ -35,6 +36,5 @@ public function show($slug)
             'message' =>'error'
             ]);
     }
-
 }
 }
